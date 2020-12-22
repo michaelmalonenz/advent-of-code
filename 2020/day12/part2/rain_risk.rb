@@ -1,10 +1,29 @@
-actions = File.readlines("input").map(&:strip)
+actions = File.readlines('input').map(&:strip)
 
 class Ferry
   def initialize()
-    @heading = 90
     @north = 0
     @east = 0
+  end
+
+  def move_in_waypoint_direction(value, waypoint)
+    @north += (waypoint.north * value)
+    @east += (waypoint.east * value)
+  end
+
+  def get_manhattan()
+    return @north.abs() + @east.abs()
+  end
+
+end
+
+class Waypoint
+
+  attr_reader :north, :east
+
+  def initialize()
+    @north = 1
+    @east = 10
   end
 
   def do_action(action, value)
@@ -18,37 +37,42 @@ class Ferry
     when 'W'
       @east -= value
     when 'L'
-      @heading = (@heading - value) % 360
+      rotate(value)
     when 'R'
-      @heading = (@heading + value) % 360
-    when 'F'
-      case @heading
-      when 0
-        @north += value
-      when 90
-        @east += value
-      when 180
-        @north -= value
-      when 270
-        @east -= value
-      else
-        raise "Unknown Heading: #{@heading}"
-      end
+      rotate(-value)
     else
       raise "Unknown action: #{action}"
     end
   end
 
-  def get_manhattan()
-    return @north.abs() + @east.abs()
+  private
+  def deg_to_rad(value)
+    return value * Math::PI / 180 
   end
+
+  def rotate(value)
+    ox, oy = 0, 0
+    px, py = @east, @north
+    angle = deg_to_rad(value)
+    qx = ox + Math.cos(angle) * (px - ox) - Math.sin(angle) * (py - oy)
+    qy = oy + Math.sin(angle) * (px - ox) + Math.cos(angle) * (py - oy)
+
+    @north = qy.round(0).to_i
+    @east = qx.round(0).to_i
+  end
+
 end
 
 ferry = Ferry.new()
+waypoint = Waypoint.new()
 actions.each do |action|
   dir = action[0]
   value = (action[1, action.length - 1]).to_i
-  ferry.do_action(dir, value)
+  if dir == 'F'
+    ferry.move_in_waypoint_direction(value, waypoint)
+  else
+    waypoint.do_action(dir, value)
+  end
 end
 
 puts ferry.get_manhattan()
