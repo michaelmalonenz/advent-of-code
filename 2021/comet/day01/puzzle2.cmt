@@ -1,0 +1,21 @@
+var lines = File.read_all_lines('input')
+# toggle_stack_printing()
+var numbers = []
+foreach (var line in lines) {
+    numbers.add(Number.parse(line))
+}
+
+var previous_sum = nil
+var increase_count = 0
+
+for (var i = 2; i < numbers.length(); i += 1) {
+    var sum = numbers[i] + numbers[i-1] + numbers[i-2]
+    if (!previous_sum.nil?()) {
+        if (sum > previous_sum) {
+            increase_count += 1
+        }
+    }
+    previous_sum = sum
+}
+
+print("Result: ", increase_count)

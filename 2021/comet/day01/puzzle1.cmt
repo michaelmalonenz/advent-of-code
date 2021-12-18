@@ -1,0 +1,14 @@
+var lines = File.read_all_lines('input')
+var previous = nil
+var increase_count = 0
+foreach (var line in lines) {
+    var num = Number.parse(line)
+    if (!previous.nil?()) {
+        if (num > previous) {
+            increase_count += 1
+        }
+    }
+    previous = num
+}
+
+print("Result: ", increase_count)

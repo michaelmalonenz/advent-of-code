@@ -1,0 +1,53 @@
+function strbin_to_num(str)
+{
+    var result = 0
+    var len = str.length()
+    for (var i = 0; i < len; i+=1) {
+        result += Number.parse(str[i]) << (len - i - 1)
+    }
+    return result
+}
+
+function get_rating(numbers, oxygen) {
+    var length = numbers[0].trim().length()
+    var remainder = numbers
+    for (var i = 0; i < length; i += 1) {
+        var ones = []
+        var zeroes = []
+        foreach (var num in remainder) {
+            if (num[i] == '0') {
+                zeroes.add(num)
+            }
+            else if (num[i] == '1') {
+                ones.add(num)
+            }
+            else {
+                throw Exception('Unexpected digit: ' + num[i])
+            }
+        }
+        if (ones.length() >= zeroes.length()) {
+            if (oxygen) {
+                remainder = ones
+            }
+            else {
+                remainder = zeroes
+            }
+        }
+        else if (ones.length() < zeroes.length()) {
+            if (oxygen)
+                remainder = zeroes
+            else
+                remainder = ones
+        }
+        if (remainder.length() == 1) {
+            return strbin_to_num(remainder[0])
+        }
+    }
+    throw Exception('Could not find rating')
+}
+
+var numbers = File.read_all_lines('input')
+var oxygen = get_rating(numbers, true)
+var co2 = get_rating(numbers, false)
+print(co2 * oxygen)
+
