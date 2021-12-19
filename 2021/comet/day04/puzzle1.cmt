@@ -1,0 +1,106 @@
+class BingoCell {
+    init(num) {
+        self.number = num
+        self.marked = false
+    }
+
+    mark() {
+        self.marked = true
+    }
+}
+
+class BingoBoard {
+    init() {
+        self.board = []
+    }
+
+    add_line(line) {
+        foreach (var num in line) {
+            self.board.append(BingoCell(num))
+        }
+    }
+
+    mark(num) {
+        foreach (var cell in self.board) {
+            if (cell.number == num) {
+                cell.mark()
+            }
+        }
+    }
+
+    check_rows() {
+        for(var y = 0; y < 5; y += 1) {
+            var all_marked = true
+            for(var x = 0; x < 5; x += 1) {
+                var cell = self.board[(y * 5) + x]
+                all_marked = all_marked && cell.marked
+            }
+            if (all_marked) {
+                return true
+            }
+        }
+        return false
+    }
+
+    check_columns() {
+        for(var y = 0; y < 5; y += 1) {
+            var all_marked = true
+            for(var x = 0; x < 5; x += 1) {
+                var cell = self.board[y + (x * 5)]
+                all_marked = all_marked && cell.marked
+            }
+            if (all_marked) {
+                return true
+            }
+        }
+        return false
+    }
+
+    check() {
+        if (self.check_rows() || self.check_columns()) {
+            return true
+        }
+        return false
+    }
+
+    sum_unmarked_numbers() {
+        var sum = 0
+        foreach (var cell in self.board) {
+            if (!cell.marked) {
+                sum += cell.number
+            }
+        }
+        return sum
+    }
+}
+
+var lines = File.read_all_lines('input')
+var moves = lines[0].split(',').map(|str| {
+    return Number.parse(str)
+})
+
+var boards = []
+
+var current_board = BingoBoard()
+for (var i = 2; i < lines.length(); i += 1) {
+    var line = lines[i].trim()
+    if (line.empty?()) {
+        boards.add(current_board)
+        current_board = BingoBoard()
+        next
+    }
+    current_board.add_line(line.trim().split(' ').map(|str| {
+        return Number.parse(str)
+    }))
+}
+boards.add(current_board)
+
+foreach (var move in moves) {
+    foreach(var board in boards) {
+        board.mark(move)
+        if (board.check()) {
+            print(board.sum_unmarked_numbers() * move)
+            exit(0)
+        }
+    }
+}
