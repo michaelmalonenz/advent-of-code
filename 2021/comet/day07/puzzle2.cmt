@@ -1,0 +1,29 @@
+function calc_fuel(positions) {
+    return ((positions * (positions + 1)) / 2).floor()
+}
+
+assert(calc_fuel(11) == 66)
+assert(calc_fuel(4) == 10)
+assert(calc_fuel(3) == 6)
+assert(calc_fuel(5) == 15)
+assert(calc_fuel(1) == 1)
+assert(calc_fuel(3) == 6)
+assert(calc_fuel(2) == 3)
+assert(calc_fuel(4) == 10)
+assert(calc_fuel(3) == 6)
+assert(calc_fuel(9) == 45)
+
+var positions = File.read_all_lines('input')[0].split(',').map(|x| {
+    return Number.parse(x)
+})
+
+var fuel_required = List(positions.length())
+for (var i = 0; i < positions.length(); i+=1) {
+    var current = positions[i]
+    var fuel = positions.reduce(0, |acc, item, index| {
+        return acc + calc_fuel((item - current).absolute_value())
+    })
+    fuel_required[i] = fuel
+}
+
+print('Minimum Fuel: ', fuel_required.min())

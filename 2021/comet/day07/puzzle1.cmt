@@ -1,0 +1,14 @@
+var positions = File.read_all_lines('test')[0].split(',').map(|x| {
+    return Number.parse(x)
+})
+
+var fuel_required = List(positions.length())
+for (var i = 0; i < positions.length(); i+=1) {
+    var current = positions[i]
+    var fuel = positions.reduce(0, |acc, item, index| {
+        return acc + (item - current).absolute_value()
+    })
+    fuel_required[i] = fuel
+}
+
+print('Minimum Fuel: ', fuel_required.min())
