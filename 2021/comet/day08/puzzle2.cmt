@@ -1,0 +1,201 @@
+enum Segment { a, b, c, d, e, f, g }
+
+#   aaaa
+#  b    c
+#  b    c
+#   dddd
+#  e    f
+#  e    f
+#   gggg
+class SegmentDisplay {
+    init(display_values) {
+        self.wires = List(Segment.count())
+        self.display_values = display_values
+        foreach (var segment in Segment) {
+            self.wires[segment] = [
+                Segment.a, Segment.b, Segment.c, Segment.d, Segment.e, Segment.f, Segment.g
+            ]
+        }
+        self.one_filter = []
+        self.b_filter = []
+        self.four_filter = []
+    }
+
+    remove_all(segment, values) {
+        self.wires[segment] = self.wires[segment].filter(|x| {
+            return !values.contains?(x)
+        })
+    }
+
+    add_combination(values) {
+        var before = values
+        var length = values.length()
+        values = values.filter(|x| {
+            return !self.one_filter.contains?(x)
+        })
+        if (length == 2) {
+            # number 1
+            self.one_filter = values
+            self.wires[Segment.c] = values
+            self.wires[Segment.f] = values
+            self.remove_all(Segment.e, values)
+            self.remove_all(Segment.g, values)
+        } else if (length == 3) {
+            # number 7
+            self.wires[Segment.a] = values
+            self.remove_all(Segment.e, values)
+            self.remove_all(Segment.g, values)
+        } else if (length == 4) {
+            # number 4
+            self.wires[Segment.b] = values
+            self.wires[Segment.d] = values
+            self.b_filter = values
+            self.four_filter = before
+            self.remove_all(Segment.e, values)
+            self.remove_all(Segment.g, values)
+        } else if (length == 5 ) {
+            if (values.length() == 3) {
+                # number 3
+                self.remove_all(Segment.b, values)
+                self.remove_all(Segment.e, values)
+            } else {
+                var possibles = values.filter(|x| {
+                    return !self.b_filter.contains?(x)
+                })
+                if (possibles.length() == 3) {
+                    # number 2
+                    self.remove_all(Segment.b, possibles)
+                    self.remove_all(Segment.f, possibles)
+                }
+                else {
+                    # number 5
+                    self.remove_all(Segment.c, possibles)
+                    self.remove_all(Segment.e, possibles)
+                }
+            }
+        } else if (length == 6) {
+            if (values.length() == 5) {
+                var eff = before.filter(|x| {
+                    return !values.contains?(x)
+                })
+                self.remove_all(Segment.c, eff)
+                self.remove_all(Segment.f, self.wires[Segment.c])
+            } else if (values.length() == 4) {
+                var zero_or_nine = before.filter(|x| {
+                    return !self.four_filter.contains?(x)
+                })
+                if (zero_or_nine.length() == 3) {
+                    # zero
+                    self.remove_all(Segment.d, before)
+                    self.wires[Segment.g] = zero_or_nine.filter(|x| {
+                        return !self.wires[Segment.a].contains?(x) && !self.wires[Segment.e].contains?(x)
+                    })
+                }
+            }
+        }
+    }
+
+    get_displayed_number() {
+        var result = '0'
+        foreach (var num in self.display_values) {
+            var length = num.length()
+            if (length == 2) {
+                result += '1'
+            } else if (length == 3) {
+                result += '7'
+            } else if (length == 4) {
+                result += '4'
+            } else if (length == 7) {
+                result += '8'
+            } else if (length == 5) {
+                if (!num.contains?(self.wires[Segment.b][0]) && !num.contains?(self.wires[Segment.e][0])) {
+                    result += '3'
+                } else if (!num.contains?(self.wires[Segment.b][0])) {
+                    result += '2'
+                } else {
+                    result += '5'
+                }
+            } else if (length == 6) {
+                if (!num.contains?(self.wires[Segment.d][0])) {
+                    result += '0'
+                } else if (!num.contains?(self.wires[Segment.c][0])) {
+                    result += '6'
+                } else {
+                    result += '9'
+                }
+            }
+        }
+        return Number.parse(result)
+    }
+
+    show() {
+        var line = ' '
+        line += self.wires[Segment.a].length() == 1 ? '----' : '    '
+        print(line)
+        
+        line = self.wires[Segment.b].length() == 1 ? '|' : ' '
+        line += '    '
+        line += self.wires[Segment.c].length() == 1 ? '|' : ' '
+        print(line)
+        print(line)
+
+        line = ' ' + (self.wires[Segment.d].length() == 1 ? '----' : '    ')
+        print(line)
+
+        line = self.wires[Segment.e].length() == 1 ? '|' : ' '
+        line += '    '
+        line += self.wires[Segment.f].length() == 1 ? '|' : ' '
+        print(line)
+        print(line)
+
+        line = ' ' + (self.wires[Segment.g].length() == 1 ? '----' : '    ')
+        print(line)
+
+        print('')
+    }
+}
+
+
+function parse_segment_combinations(raw_line_part) {
+    return raw_line_part.trim().split(' ').map(|x| {
+        var display = []
+        foreach (var letter in x) {
+            display.add(Segment.parse(letter))
+        }
+        return display
+    })
+}
+
+var lines = File.read_all_lines('input')
+var unique_segment_counts = [2, 3, 4, 7]
+var total = 0
+
+foreach (var line in lines) {
+    var parts = line.trim().split('|')
+    var combinations = parse_segment_combinations(parts[0])
+    var display_values = parse_segment_combinations(parts[1])
+    var display = SegmentDisplay(display_values)
+    foreach (var count in unique_segment_counts) {
+        display.add_combination(combinations.find(|x| {
+            return x.length() == count
+        }))
+    }
+
+    var fives = combinations.filter(|x| {
+        return x.length() == 5
+    })
+    foreach (var five in fives) {
+        display.add_combination(five)
+    }
+    
+    var sixes = combinations.filter(|x| {
+        return x.length() == 6
+    })
+    foreach (var six in sixes) {
+        display.add_combination(six)
+    }
+
+    total += display.get_displayed_number()
+}
+
+print(total)
