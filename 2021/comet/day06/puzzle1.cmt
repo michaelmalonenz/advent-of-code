@@ -1,0 +1,20 @@
+var state = File.read_all_lines('input')[0].split(',').map(|x| {
+    return Number.parse(x)
+})
+
+for(var day = 0; day < 80; day += 1) {
+    var fish_to_add = 0
+    for (var i = 0; i < state.length(); i+=1) {
+        if (state[i] == 0) {
+            state[i] = 6
+            fish_to_add += 1
+        } else {
+            state[i] -= 1
+        }
+    }
+    for (var i = 0; i < fish_to_add; i+=1) {
+        state.append(8)
+    }
+}
+
+print(state.length())
