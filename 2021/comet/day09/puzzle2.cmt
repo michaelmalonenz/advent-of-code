@@ -1,0 +1,142 @@
+class Position {
+    init(x, y, value) {
+        self.x = x
+        self.y = y
+        self.value = value
+        self.set? = false
+    }
+
+    set() {
+        self.set? = true
+    }
+
+    operator ==(rhs) {
+        return self.x == rhs.x && self.y == rhs.y && self.value == rhs.value
+    }
+
+    to_string() {
+        return '(' + self.x.to_string() + ',' + self.y.to_string() + ') ' + self.set?.to_string() + ' ' + self.value.to_string()
+    }
+}
+
+class HeightMap {
+    init(width, height) {
+        self.grid = List(width * height)
+        self.width = width
+        self.height = height
+        self._current_line = 0
+    }
+
+    add_line(line) {
+        var x = 0
+        foreach (var digit in line) {
+            self._set(x, self._current_line, Number.parse(digit))
+            x += 1
+        }
+        self._current_line += 1
+    }
+
+    _get(x, y) {
+        return self.grid[(y*self.width) + x]
+    }
+
+    _set(x, y, val) {
+        return self.grid[(y*self.width) + x] = Position(x, y, val)
+    }
+
+    _get_north(x, y) {
+        if (y == 0) {
+            return nil
+        }
+        return self._get(x, y-1)
+    }
+
+    _get_east(x, y) {
+        if (x == (self.width - 1)) {
+            return nil
+        }
+        return self._get(x+1, y)
+    }
+
+    _get_west(x, y) {
+        if (x == 0) {
+            return nil
+        }
+        return self._get(x-1, y)
+    }
+
+    _get_south(x, y) {
+        if (y == (self.height - 1)) {
+            return nil
+        }
+        return self._get(x, y+1)
+    }
+
+    explore_valley(pos) {
+        var explored = []
+        var to_explore = [pos]
+        while (to_explore.length() > 0) {
+            var current = to_explore.pop()
+            var new_nodes = [
+                self._get_north(current.x, current.y),
+                self._get_east(current.x, current.y),
+                self._get_south(current.x, current.y),
+                self._get_west(current.x, current.y),
+            ].filter(|x| {
+                return !x.nil?() && x.value < 9 && !x.set?
+            })
+            foreach (var node in new_nodes) {
+                if (!to_explore.contains?(node)) {
+                    to_explore.push(node)
+                }
+            }
+            current.set()
+            explored.push(current)
+        }
+        return explored.length()
+    }
+
+    get_valleys() {
+        var valleys = []
+        for (var x = 0; x < self.width;) {
+            for (var y = 0; y < self.height;) {
+                var pos = self._get(x, y)
+                if (!pos.set? && pos.value < 9) {
+                    valleys.append(self.explore_valley(pos))
+                }
+                y += 1
+            }
+            x += 1
+        }
+        return valleys.sort()
+    }
+
+    print() {
+        for (var y = 0; y < self.height; y += 1) {
+            var line = ''
+            for (var x = 0; x < self.width; x += 1) {
+                var current = self._get(x, y)
+                if (current.set?)
+                    line += current.value.to_string()
+                else
+                    line += '.'
+            }
+            print(line)
+        }
+    }
+}
+
+var lines = File.read_all_lines('input')
+var height = lines.length()
+var width = lines[0].trim().length()
+
+var map = HeightMap(width, height)
+foreach (var line in lines) {
+    map.add_line(line)
+}
+
+var valleys = map.get_valleys()
+var top = valleys[-1]
+var second = valleys[-2]
+var third = valleys[-3]
+print(top * second * third)

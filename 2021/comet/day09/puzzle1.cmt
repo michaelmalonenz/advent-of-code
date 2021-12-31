@@ -1,0 +1,89 @@
+class HeightMap {
+    init(width, height) {
+        self.grid = List(width * height)
+        self.width = width
+        self.height = height
+        self._current_line = 0
+    }
+
+    add_line(line) {
+        var x = 0
+        foreach (var digit in line) {
+            self._set(x, self._current_line, Number.parse(digit))
+            x += 1
+        }
+        self._current_line += 1
+    }
+
+    _get(x, y) {
+        return self.grid[(y*self.width) + x]
+    }
+
+    _set(x, y, val) {
+        return self.grid[(y*self.width) + x] = val
+    }
+
+    _get_north(x, y) {
+        if (y == 0) {
+            return nil
+        }
+        return self._get(x, y-1)
+    }
+
+    _get_east(x, y) {
+        if (x == (self.width - 1)) {
+            return nil
+        }
+        return self._get(x+1, y)
+    }
+
+    _get_west(x, y) {
+        if (x == 0) {
+            return nil
+        }
+        return self._get(x-1, y)
+    }
+
+    _get_south(x, y) {
+        if (y == (self.height - 1)) {
+            return nil
+        }
+        return self._get(x, y+1)
+    }
+
+    get_low_points() {
+        var low_points = []
+        for (var x = 0; x < self.width; x+=1) {
+            for (var y = 0; y < self.height; y+=1) {
+                var current = self._get(x, y)
+                var minimum = [
+                    self._get_north(x, y),
+                    self._get_east(x, y),
+                    self._get_west(x, y),
+                    self._get_south(x, y),
+                ].filter(|dir| {
+                    return !dir.nil?()
+                }).min()
+                if (current < minimum) {
+                    low_points.add(current)
+                }
+            }
+        }
+        return low_points
+    }
+}
+
+var lines = File.read_all_lines('input')
+var height = lines.length()
+var width = lines[0].trim().length()
+
+var map = HeightMap(width, height)
+foreach (var line in lines) {
+    map.add_line(line)
+}
+
+var low_points = map.get_low_points()
+var risk = low_points.reduce(0, |acc, item, index| {
+    return acc + item + 1
+})
+print(risk)
