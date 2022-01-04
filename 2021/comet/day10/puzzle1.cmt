@@ -1,0 +1,45 @@
+function match(open, close) {
+    if (close == '}') {
+        return open == '{'
+    } else if (close == ']') {
+        return open == '['
+    } else if (close == ')') {
+        return open == '('
+    } else if (close == '>') {
+        return open == '<'
+    }
+    return false
+}
+
+var lines = File.read_all_lines('input')
+
+var incorrect_syntax = []
+foreach (var line in lines) {
+    var stack = []
+    foreach (var letter in line.trim()) {
+        if (letter == '}' || letter == ']' || letter == ')' || letter == '>') {
+            var duplicate = stack.pop()
+            if (!match(duplicate, letter)) {
+                incorrect_syntax.push(letter)
+                break
+            }
+        }
+        else {
+            stack.push(letter)
+        }
+    }
+}
+
+var points = 0
+foreach (var closer in incorrect_syntax) {
+    if (closer == ')') {
+        points += 3
+    } else if (closer == ']') {
+        points += 57
+    } else if (closer == '}') {
+        points += 1197
+    } else if (closer == '>') {
+        points += 25137
+    }
+}
+print(points)
