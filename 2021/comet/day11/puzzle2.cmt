@@ -1,0 +1,165 @@
+class Octopus {
+    init(x, y, energy) {
+        self.x = x
+        self.y = y
+        self.energy = energy
+        self.flashed = false
+    }
+
+    step() {
+        self.energy += 1
+        self.flashed = false
+    }
+
+    flash() {
+        self.energy = 0
+        self.flashed = true
+    }
+
+    increment_energy() {
+        if (!self.flashed) {
+            self.energy += 1
+        }
+    }
+
+    operator==(other) {
+        return other.x == self.x && other.y == self.y
+    }
+}
+
+class Grid {
+    init(width, height) {
+        self.grid = List(width * height)
+        self.width = width
+        self.height = height
+        self._current_line = 0
+    }
+
+    add_line(line) {
+        var x = 0
+        foreach (var digit in line) {
+            self._set(x, self._current_line, Number.parse(digit))
+            x += 1
+        }
+        self._current_line += 1
+    }
+
+    _get(x, y) {
+        return self.grid[(y*self.width) + x]
+    }
+
+    _set(x, y, val) {
+        return self.grid[(y*self.width) + x] = Octopus(x, y, val)
+    }
+
+    _get_north(x, y) {
+        if (y == 0) {
+            return nil
+        }
+        return self._get(x, y-1)
+    }
+
+    _get_north_east(x, y) {
+        if (y == 0 || x == (self.width - 1)) {
+            return nil
+        }
+        return self._get(x+1, y-1)
+    }
+
+    _get_north_west(x, y) {
+        if (y == 0 || x == 0) {
+            return nil
+        }
+        return self._get(x-1, y-1)
+    }
+
+    _get_east(x, y) {
+        if (x == (self.width - 1)) {
+            return nil
+        }
+        return self._get(x+1, y)
+    }
+
+    _get_west(x, y) {
+        if (x == 0) {
+            return nil
+        }
+        return self._get(x-1, y)
+    }
+
+    _get_south(x, y) {
+        if (y == (self.height - 1)) {
+            return nil
+        }
+        return self._get(x, y+1)
+    }
+
+    _get_south_east(x, y) {
+        if (y == (self.height - 1) || x == (self.width - 1)) {
+            return nil
+        }
+        return self._get(x+1, y+1)
+    }
+
+    _get_south_west(x, y) {
+        if (y == (self.height - 1) || x == 0) {
+            return nil
+        }
+        return self._get(x-1, y+1)
+    }
+
+    _get_all_adjacent(octopus) {
+        return [
+            self._get_north(octopus.x, octopus.y),
+            self._get_north_east(octopus.x, octopus.y),
+            self._get_east(octopus.x, octopus.y),
+            self._get_south_east(octopus.x, octopus.y),
+            self._get_south(octopus.x, octopus.y),
+            self._get_south_west(octopus.x, octopus.y),
+            self._get_west(octopus.x, octopus.y),
+            self._get_north_west(octopus.x, octopus.y),
+        ].filter(|x| { return !x.nil?() })
+    }
+
+    iterate(lambda) {
+        for (var y = 0; y < self.height; y+=1) {
+            for (var x = 0; x < self.width; x+=1) {
+                lambda(self._get(x, y))
+            }
+        }
+    }
+
+    run_step() {
+        var num_flashes = 0
+        self.iterate(|octopus| { octopus.step() })
+        var to_flash = self.grid.filter(|octopus| { return octopus.energy > 9 })
+        while (to_flash.length() > 0) {
+            var current = to_flash.pop()
+            current.flash()
+            num_flashes += 1
+            foreach (var adjacent in self._get_all_adjacent(current)) {
+                adjacent.increment_energy()
+                if (adjacent.energy > 9 && !to_flash.contains?(adjacent)) {
+                    to_flash.push(adjacent)
+                }
+            }
+        }
+        return num_flashes == self.grid.length()
+    }
+}
+
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+var grid = Grid(10, 10)
+foreach (var line in lines) {
+    grid.add_line(line)
+}
+
+var all_flashed = false
+var step = 0
+while (all_flashed == false) {
+    all_flashed = grid.run_step()
+    step += 1
+}
+
+print(step)
