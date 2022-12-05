@@ -1,0 +1,21 @@
+var elf_calories = []
+
+var lines = File.read_all_lines('input')
+var current_total = 0
+foreach (var line in lines) {
+    if (line.trim().empty?()) {
+        elf_calories.push(current_total)
+        current_total = 0
+    } else {
+        current_total += Number.parse(line.trim())
+    }
+}
+elf_calories.push(current_total)
+
+var max = nil
+foreach (var count in elf_calories) {
+    if (max.nil?() || count > max) {
+        max = count
+    }
+}
+print(max)

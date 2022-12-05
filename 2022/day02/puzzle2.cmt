@@ -1,0 +1,46 @@
+var ROCK = 'A'
+var PAPER = 'B'
+var SCISSORS = 'C'
+
+var LOSE = 'X'
+var DRAW = 'Y'
+var WIN = 'Z'
+
+var scores = {
+    ROCK: 1,
+    PAPER: 2,
+    SCISSORS: 3,
+}
+
+var winning_moves = {
+    ROCK: PAPER,
+    PAPER: SCISSORS,
+    SCISSORS: ROCK,
+}
+
+var losing_moves = {
+    ROCK: SCISSORS,
+    PAPER: ROCK,
+    SCISSORS: PAPER,
+}
+
+var total_score = 0
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+foreach (var line in lines) {
+    var moves = line.split(' ')
+    var other = moves[0]
+    var mine = moves[1]
+    if (mine == LOSE) {
+        total_score += scores[losing_moves[other]]
+    }
+    else if (mine == DRAW) {
+        total_score += scores[other]
+        total_score += 3
+    }
+    else if (mine == WIN) {
+        total_score += scores[winning_moves[other]]
+        total_score += 6
+    }
+}
+
+print(total_score)
