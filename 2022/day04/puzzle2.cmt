@@ -1,0 +1,31 @@
+class Section {
+    init(assignment_def) {
+        var things = assignment_def.split('-')
+        self.start = Number.parse(things[0])
+        self.end = Number.parse(things[1])
+    }
+
+    overlaps?(other) {
+        return (self.start <= other.start && self.end >= other.start) ||
+            (self.start <= other.end && self.end >= other.end)
+    }
+
+    to_string() {
+        return self.start.to_string() + '-' + self.end.to_string()
+    }
+}
+
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+
+var count = 0
+foreach (var line in lines) {
+    var pairs = line.split(',')
+    var first = Section(pairs[0])
+    var second = Section(pairs[1])
+    if (first.overlaps?(second) || second.overlaps?(first)) {
+        count += 1
+    }
+}
+
+print(count)
