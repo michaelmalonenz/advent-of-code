@@ -1,0 +1,32 @@
+function calculate_value(item) {
+    if (item >= 'a' && item <= 'z') {
+        return item.value() - 'a'.value() + 1
+    }
+    return item.value() - 'A'.value() + 27
+}
+
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+var total = 0
+
+foreach (var line in lines) {
+    var duplicates = []
+    var half = line.length() / 2
+    var first = line.substring(0, half)
+    var second = line.substring(half, half)
+    foreach (var char in first) {
+        if (second.contains?(char)) {
+            duplicates.push(char)
+        }
+    }
+    var unique = []
+    foreach (var duplicate in duplicates) {
+        if (!unique.contains?(duplicate)) {
+            unique.add(duplicate)
+        }
+    }
+    foreach (var item in unique) {
+        total += calculate_value(item)
+    }
+}
+print(total)

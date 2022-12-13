@@ -1,0 +1,31 @@
+function calculate_value(item) {
+    if (item >= 'a' && item <= 'z') {
+        return item.value() - 'a'.value() + 1
+    }
+    return item.value() - 'A'.value() + 27
+}
+
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+var total = 0
+
+var index = 0
+var current_group = []
+var found = false
+foreach (var line in lines) {
+    current_group.add(line)
+    index += 1
+    if (index % 3 == 0) {
+        foreach (var char in line) {
+            if (current_group[0].contains?(char) && current_group[1].contains?(char)) {
+                if (!found) {
+                    total += calculate_value(char)
+                    found = true
+                }
+            }
+        }
+        current_group = []
+        found = false
+    }
+}
+print(total)
