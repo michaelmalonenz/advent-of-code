@@ -1,0 +1,49 @@
+var lines = File.read_all_lines('input')
+
+var stack_input = []
+var moves = []
+var moves_found? = false
+foreach (var line in lines) {
+    if (line.empty?()) {
+        moves_found? = true
+        next
+    }
+    if (moves_found?) {
+        moves.add(line)
+    } else {
+        stack_input.add(line)
+    }
+}
+
+var stack = []
+var sizes = stack_input.pop()
+var length = Number.parse(sizes.trim().split(' ')[-1])
+
+for (var i = 0; i < length; i+=1) {
+    stack.add([])
+}
+
+for (var i = stack_input.length()-1; i >= 0; i-=1) {
+    for (var j = 0; j < length; j+=1) {
+        var index = (((j+1)*2) + (2*j)) - 1
+        var letter = stack_input[i][index]
+        if (letter != ' ')
+            stack[j].add(letter)
+    }
+}
+
+foreach (var move in moves) {
+    var parts = move.split(' ')
+    var count = Number.parse(parts[1])
+    var from = Number.parse(parts[3]) - 1
+    var to = Number.parse(parts[5]) - 1
+    for (var i = 0; i < count; i+=1) {
+        stack[to].add(stack[from].pop())
+    }
+}
+
+var moves = ''
+foreach (var pile in stack) {
+    moves += pile.pop()
+}
+print(moves)
