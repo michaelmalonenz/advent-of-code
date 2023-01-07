@@ -1,0 +1,98 @@
+var MIN_SIZE_TO_DELETE = 8_381_165
+
+var CometFile = File
+
+
+class File {
+    init(name, size) {
+        self.name = name
+        self._size = Number.parse(size)
+    }
+
+    size() {
+        return self._size
+    }
+}
+
+class Dir {
+    init(name, parent=nil) {
+        self.name = name
+        self.parent = parent
+        self.files = []
+        self.dirs = []
+    }
+
+    add_file(name, size) {
+        self.files.add(File(name, size))
+    }
+
+    add_dir(name) {
+        self.dirs.add(Dir(name, self))
+    }
+
+    size() {
+        var total = 0
+        foreach (var file in self.files) {
+            total += file.size()
+        }
+        foreach (var dir in self.dirs) {
+            total += dir.size()
+        }
+        return total
+    }
+
+    get_parent() {
+        return self.parent
+    }
+
+    get_child(dirname) {
+        foreach(var dir in self.dirs) {
+            if (dir.name == dirname) {
+                return dir
+            }
+        }
+        throw Exception("Can't find dir: " + dirname)
+    }
+
+    to_string() {
+        return self.name
+    }
+}
+
+var root = Dir('/')
+var cwd = root
+var lines = CometFile.read_all_lines('input').map(|x| { return x.trim() })
+
+foreach (var line in lines) {
+    if (line == '$ cd ..') {
+        cwd = cwd.get_parent()
+    } else if (line == '$ cd /') {
+        cwd = root
+    } else if (line.starts_with?('$ cd')) {
+        var dirname = line.split(' ')[2]
+        cwd = cwd.get_child(dirname)
+    } else if (line.starts_with?('$ ls')) {
+    }
+    else {
+        var parts = line.split(' ')
+        if (parts[0] == 'dir') {
+            cwd.add_dir(parts[1])
+        } else {
+            cwd.add_file(parts[1], parts[0])
+        }
+    }
+}
+
+var min = 70_000_000
+function visit_dir(dir) {
+    var size = dir.size()
+    if (size >= MIN_SIZE_TO_DELETE && size < min) {
+        min = size
+    }
+    foreach (var _dir in dir.dirs) {
+        visit_dir(_dir)
+    }
+}
+
+visit_dir(root)
+print(min)
