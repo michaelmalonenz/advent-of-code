@@ -1,0 +1,17 @@
+var input = File.read_all_lines('input')[0].trim()
+
+
+for (var i = 0; i < input.length() - 4; i += 1) {
+    var test = []
+    for (var j = 0; j < 4; j+=1) {
+        var letter = input[i+j]
+        if (!test.contains?(letter)) {
+            test.add(letter)
+        }
+    }
+    if (test.length() == 4) {
+        print(test)
+        print(i+4)
+        exit(0)
+    }
+}
