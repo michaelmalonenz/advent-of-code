@@ -1,0 +1,65 @@
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+var grid = List(lines.length())
+var index = 0
+foreach (var line in lines) {
+    var tree_line = []
+    foreach (var tree in line) {
+        tree_line.add(Number.parse(tree))
+    }
+    grid[index] = tree_line
+    index += 1
+}
+
+var MIN_X = 0
+var MIN_Y = 0
+var MAX_X = grid[0].length()
+var MAX_Y = grid.length()
+
+function is_visible?(x, y) {
+    if (x == MIN_X || x == (MAX_X - 1) ||
+        y == MIN_Y || y == (MAX_Y - 1)) {
+        return true
+    }
+    var tree = grid[y][x]
+    var north = true
+    for (var i = y-1; i >= 0; i-=1) {
+        if (grid[i][x] >= tree) {
+            north = false
+        }
+    }
+
+    var south = true
+    for (var i = y+1; i < MAX_Y; i+=1) {
+        if (grid[i][x] >= tree) {
+            south = false
+        }
+    }
+
+    var east = true
+    for (var i = x+1; i < MAX_X; i+=1) {
+        if (grid[y][i] >= tree) {
+            east = false
+        }
+    }
+
+    var west = true
+    for (var i = x-1; i >= 0; i-=1) {
+        if (grid[y][i] >= tree) {
+            west = false
+        }
+    }
+    
+    return north || east || south || west
+}
+
+var visible_count = 0
+for (var x = 0; x < MAX_X; x+=1) {
+    for (var y = 0; y < MAX_Y; y+=1) {
+        if (is_visible?(x, y)) {
+            visible_count += 1
+        }
+    }
+}
+
+print(visible_count)

@@ -1,0 +1,49 @@
+var lines = File.read_all_lines('input').map(|x| { return x.trim() })
+
+var grid = List(lines.length())
+var index = 0
+foreach (var line in lines) {
+    var tree_line = []
+    foreach (var tree in line) {
+        tree_line.add(Number.parse(tree))
+    }
+    grid[index] = tree_line
+    index += 1
+}
+
+var MIN_X = 0
+var MIN_Y = 0
+var MAX_X = grid[0].length()
+var MAX_Y = grid.length()
+
+function count_visible_trees(origin_x, origin_y, x_dir, y_dir) {
+    var visible = 0
+    var origin_height = grid[origin_x][origin_y]
+    var x = origin_x + x_dir
+    var y = origin_y + y_dir
+    while (x >= 0 && x < MAX_X && y >= 0 && y < MAX_Y) {
+        visible += 1
+        if (grid[x][y] >= origin_height)
+            return visible
+        x += x_dir
+        y += y_dir
+    }
+    return visible
+}
+
+var max = 0
+
+for (var x = MIN_X; x < MAX_X; x += 1) {
+    for (var y = MIN_Y; y < MAX_Y; y += 1) {
+        var north = count_visible_trees(x, y, 0, -1)
+        var east = count_visible_trees(x, y, 1, 0)
+        var south = count_visible_trees(x, y, 0, 1)
+        var west = count_visible_trees(x, y, -1, 0)
+
+        var total = north * east * south * west
+        if (total > max)
+            max = total
+    }
+}
+
+print(max)
